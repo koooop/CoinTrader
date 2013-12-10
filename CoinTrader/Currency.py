@@ -17,10 +17,14 @@ class Currency(object):
         TotalReturn is calculated as "CloseValue for last unit of period"/"CloseValue for first unit of period" * 100"""
 
         units = self.data_provider.unitize(unit, period)
+        if len(units[i])== 0:
+            raise Exception("Not enough datapoints at begining for {0}".format(self.name))
         return ((units[-1][-1]/units[0][-1]) - 1) * 100
 
     def getAvgPerReturn(self, unit, period):
         units = self.data_provider.unitize(unit, period)
+        if len(units[i])== 0:
+            raise Exception("Not enough datapoints at begining for {0}".format(self.name))
         return numpy.mean([(unit[-1]/unit[0] - 1) * 100 for unit in units])
 
     def getAvgReturn(self, unit, period):
@@ -33,7 +37,7 @@ class Currency(object):
             #  2 and more members - calculate return as last - first member of unit
             if i == 0:
                 if len(units[i])== 0:
-                    raise Exception("Not enough datapoints at begining")
+                    raise Exception("Not enough datapoints at begining for {0}".format(self.name))
                 elif len(units) > 1:
                     result.append(units[i][-1] - units[i][0])
             else:
@@ -58,7 +62,7 @@ class Currency(object):
             # if first unit has 0 members, throw exception otherwise add last m. of unit
             if i == 0:
                 if len(units[i])== 0:
-                    raise Exception("Not enough datapoints at begining")
+                    raise Exception("Not enough datapoints at begining for {0}".format(self.name))
                 else:
                     result.append(units[i][-1])    
             else:
