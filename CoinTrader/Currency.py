@@ -14,18 +14,21 @@ class Currency(object):
 
     def getTotalPerReturn(self, unit, period):
         """Get total return for given period (ending on current time)
-        TotalReturn is calculated as "CloseValue for last unit of period"/"CloseValue for first unit of period" * 100"""
+        TotalReturn is calculated as "CloseValue for last non-empty unit of period"/"OpenValue for first unit of period" * 100"""
 
         units = self.data_provider.unitize(unit, period)
         if len(units[0])== 0:
             raise Exception("Not enough datapoints at begining for {0}".format(self.name))
-        return ((units[-1][-1]/units[0][-1]) - 1) * 100
+        open = units[0][0]
+        close = [entry for unit in units for entry in unit][-1]
+        return (close/open - 1) * 100
 
-    def getAvgPerReturn(self, unit, period):
-        units = self.data_provider.unitize(unit, period)
-        if len(units[0])== 0:
-            raise Exception("Not enough datapoints at begining for {0}".format(self.name))
-        return numpy.mean([(unit[-1]/unit[0] - 1) * 100 for unit in units])
+    # !!! this needs to be fixed similarly to next method
+    #def getAvgPerReturn(self, unit, period):
+    #    units = self.data_provider.unitize(unit, period)
+    #    if len(units[0])== 0:
+    #        raise Exception("Not enough datapoints at begining for {0}".format(self.name))
+    #    return numpy.mean([(unit[-1]/unit[0] - 1) * 100 for unit in units])
 
     def getAvgReturn(self, unit, period):
         units = self.data_provider.unitize(unit, period)

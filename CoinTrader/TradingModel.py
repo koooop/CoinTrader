@@ -23,6 +23,9 @@ class TradingModel(object):
     def getSellPer(self):
         return self.sell_per
 
+    def __str__(self):
+        return "Unit: {0}, Period: {1}, Key factor: {2}, Buy_dist: {3}, Sell_per: {4}".format(self.unit, self.period, self.key_factor, self.buy_distribution, self.sell_per)
+
 
 
 

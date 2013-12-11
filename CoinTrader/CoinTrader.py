@@ -7,10 +7,6 @@ import Trader
 import TradingModel
 import itertools
 
-btc = Currency.BitCoin("BTC", None)
-
-
-
 currencies_s = [["LTC", "http://www.cryptocoincharts.info/period-charts.php?period=2-weeks&resolution=hour&pair=ltc-btc&market=cryptsy"],
               ["NMC", "http://www.cryptocoincharts.info/period-charts.php?period=2-weeks&resolution=hour&pair=nmc-btc&market=cryptsy"],
               ["FTC", "http://www.cryptocoincharts.info/period-charts.php?period=2-weeks&resolution=hour&pair=ftc-btc&market=cryptsy"],
@@ -55,10 +51,6 @@ currencies_s = [["LTC", "http://www.cryptocoincharts.info/period-charts.php?peri
               ["EMD", "http://www.cryptocoincharts.info/period-charts.php?period=2-weeks&resolution=hour&pair=emd-btc&market=cryptsy"]
               ]
 
-wallet2 = Wallet.Wallet()
-for cur in currencies_s:
-    wallet2.addCurrency(cur[0], Currency.Currency(cur[0], DataProvider.CryptocoinProvider(cur[0], cur[1])), 10)
-
 unit = [240, 720, 1440]
 period = [6*1440]
 key_factor = ["sharpe", "total_return", "avg_return"]
@@ -68,10 +60,20 @@ sell_ratio = [1, 5, 10, 20]
 all_lists = [unit, period, key_factor, buy_ratios, sell_ratio]
 all_models = list(itertools.product(*all_lists))
 
+currencies_list = []
+for cur in currencies_s:
+    currencies_list.append((cur[0], Currency.Currency(cur[0], DataProvider.CryptocoinProvider(cur[0], cur[1]))))
+
 all_traders = []
 for tr_model_pars in all_models:
     tr_model = TradingModel.TradingModel(*tr_model_pars)
-    all_traders.append(Trader.Trader(wallet2, tr_model))
+    wallet = Wallet.Wallet()
+    for currency in currencies_list:
+        wallet.addCurrency(*currency, balance=10)
+    all_traders.append(Trader.Trader(wallet, tr_model))
+
+# initial value
+print all_traders[0].getWallet().getTotalValBTC()
 
 Clock.Clock.setCurrentTime(datetime.datetime.now() - datetime.timedelta(days=6))
 
@@ -79,7 +81,9 @@ while Clock.Clock.getCurrentTime() < (datetime.datetime.now() - datetime.timedel
     for trader in all_traders:
         trader.update()
     Clock.Clock.setCurrentTime(Clock.Clock.getCurrentTime() + datetime.timedelta(hours=2))
-    print Clock.Clock.getCurrentTime()
 
-for trader in all_traders:
-    print trader.getWallet().getTotalValBTC()
+# max value after trading
+print max(all_traders, key=lambda x: x.getWallet().getTotalValBTC()).getWallet().getTotalValBTC()
+
+#for trader in all_traders:
+#    print trader.getWallet().getTotalValBTC(), trader.getTradingModel()

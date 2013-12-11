@@ -42,3 +42,6 @@ class Trader(object):
 
     def getWallet(self):
         return self.wallet
+
+    def getTradingModel(self):
+        return self.trading_model
