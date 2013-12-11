@@ -5,6 +5,7 @@ import Wallet
 import Clock
 import Trader
 import TradingModel
+import itertools
 
 btc = Currency.BitCoin("BTC", None)
 
@@ -24,18 +25,18 @@ currencies_s = [["LTC", "http://www.cryptocoincharts.info/period-charts.php?peri
               ["DGC", "http://www.cryptocoincharts.info/period-charts.php?period=2-weeks&resolution=hour&pair=dgc-btc&market=cryptsy"],
               ["FST", "http://www.cryptocoincharts.info/period-charts.php?period=2-weeks&resolution=hour&pair=fst-btc&market=cryptsy"],
               ["FRC", "http://www.cryptocoincharts.info/period-charts.php?period=2-weeks&resolution=hour&pair=frc-btc&market=cryptsy"],
-              #["YAC", "http://www.cryptocoincharts.info/period-charts.php?period=2-weeks&resolution=hour&pair=yac-btc&market=cryptsy"],
+              ["YAC", "http://www.cryptocoincharts.info/period-charts.php?period=2-weeks&resolution=hour&pair=yac-btc&market=cryptsy"],
               ["CGB", "http://www.cryptocoincharts.info/period-charts.php?period=2-weeks&resolution=hour&pair=cgb-btc&market=cryptsy"],
               ["ARG", "http://www.cryptocoincharts.info/period-charts.php?period=2-weeks&resolution=hour&pair=arg-btc&market=cryptsy"],
-              #["BTB", "http://www.cryptocoincharts.info/period-charts.php?period=2-weeks&resolution=hour&pair=btb-btc&market=cryptsy"],
+              ["BTB", "http://www.cryptocoincharts.info/period-charts.php?period=2-weeks&resolution=hour&pair=btb-btc&market=cryptsy"],
               ["GLD", "http://www.cryptocoincharts.info/period-charts.php?period=2-weeks&resolution=hour&pair=gld-btc&market=cryptsy"],
               ["SRC", "http://www.cryptocoincharts.info/period-charts.php?period=2-weeks&resolution=hour&pair=src-btc&market=cryptsy"],
-              #["MNC", "http://www.cryptocoincharts.info/period-charts.php?period=2-weeks&resolution=hour&pair=mnc-btc&market=cryptsy"],
-              #["NEC", "http://www.cryptocoincharts.info/period-charts.php?period=2-weeks&resolution=hour&pair=nec-btc&market=cryptsy"],
+              ["MNC", "http://www.cryptocoincharts.info/period-charts.php?period=2-weeks&resolution=hour&pair=mnc-btc&market=cryptsy"],
+              ["NEC", "http://www.cryptocoincharts.info/period-charts.php?period=2-weeks&resolution=hour&pair=nec-btc&market=cryptsy"],
               ["LKY", "http://www.cryptocoincharts.info/period-charts.php?period=2-weeks&resolution=hour&pair=lky-btc&market=cryptsy"],
-              ##["CNC", "http://www.cryptocoincharts.info/period-charts.php?period=2-weeks&resolution=hour&pair=cnc-btc&market=cryptsy"],
-              #["NRB", "http://www.cryptocoincharts.info/period-charts.php?period=2-weeks&resolution=hour&pair=nrb-btc&market=cryptsy"],
-              #["GDC", "http://www.cryptocoincharts.info/period-charts.php?period=2-weeks&resolution=hour&pair=gdc-btc&market=cryptsy"],
+              #["CNC", "http://www.cryptocoincharts.info/period-charts.php?period=2-weeks&resolution=hour&pair=cnc-btc&market=cryptsy"],
+              ["NRB", "http://www.cryptocoincharts.info/period-charts.php?period=2-weeks&resolution=hour&pair=nrb-btc&market=cryptsy"],
+              ["GDC", "http://www.cryptocoincharts.info/period-charts.php?period=2-weeks&resolution=hour&pair=gdc-btc&market=cryptsy"],
               #["FRK", "http://www.cryptocoincharts.info/period-charts.php?period=2-weeks&resolution=hour&pair=frk-btc&market=cryptsy"],
               #["GLC", "http://www.cryptocoincharts.info/period-charts.php?period=2-weeks&resolution=hour&pair=glc-btc&market=cryptsy"],
               #["BTE", "http://www.cryptocoincharts.info/period-charts.php?period=2-weeks&resolution=hour&pair=bte-btc&market=cryptsy"],
@@ -49,24 +50,36 @@ currencies_s = [["LTC", "http://www.cryptocoincharts.info/period-charts.php?peri
               #["KGC", "http://www.cryptocoincharts.info/period-charts.php?period=2-weeks&resolution=hour&pair=kgc-btc&market=cryptsy"],
               #["GLX", "http://www.cryptocoincharts.info/period-charts.php?period=2-weeks&resolution=hour&pair=glx-btc&market=cryptsy"],
               #["BUK", "http://www.cryptocoincharts.info/period-charts.php?period=2-weeks&resolution=hour&pair=buk-btc&market=cryptsy"],
-              #["CMC", "http://www.cryptocoincharts.info/period-charts.php?period=2-weeks&resolution=hour&pair=cmc-btc&market=cryptsy"],
+              ["CMC", "http://www.cryptocoincharts.info/period-charts.php?period=2-weeks&resolution=hour&pair=cmc-btc&market=cryptsy"],
               #["AMC", "http://www.cryptocoincharts.info/period-charts.php?period=2-weeks&resolution=hour&pair=amc-btc&market=cryptsy"],
-              #["EMD", "http://www.cryptocoincharts.info/period-charts.php?period=2-weeks&resolution=hour&pair=emd-btc&market=cryptsy"]
+              ["EMD", "http://www.cryptocoincharts.info/period-charts.php?period=2-weeks&resolution=hour&pair=emd-btc&market=cryptsy"]
               ]
 
 wallet2 = Wallet.Wallet()
 for cur in currencies_s:
     wallet2.addCurrency(cur[0], Currency.Currency(cur[0], DataProvider.CryptocoinProvider(cur[0], cur[1])), 10)
 
-tr_model = TradingModel.TradingModel(240, 1440*5, "sharpe", [50, 30, 20], 10)
-trader = Trader.Trader(wallet2, tr_model)
+unit = [240, 720, 1440]
+period = [6*1440]
+key_factor = ["sharpe", "total_return", "avg_return"]
+buy_ratios = [[100], [80,20], [50,50], [60,30,10], [40,30,30], [30,20,10,10,10,5,5,5,5], [10,10,10,10,10,10,10,10,10,10]]
+sell_ratio = [1, 5, 10, 20]
 
-print wallet2
+all_lists = [unit, period, key_factor, buy_ratios, sell_ratio]
+all_models = list(itertools.product(*all_lists))
+
+all_traders = []
+for tr_model_pars in all_models:
+    tr_model = TradingModel.TradingModel(*tr_model_pars)
+    all_traders.append(Trader.Trader(wallet2, tr_model))
 
 Clock.Clock.setCurrentTime(datetime.datetime.now() - datetime.timedelta(days=6))
 
 while Clock.Clock.getCurrentTime() < (datetime.datetime.now() - datetime.timedelta(hours=24)):
-    trader.update()
-    Clock.Clock.setCurrentTime(Clock.Clock.getCurrentTime() + datetime.timedelta(hours=1))
+    for trader in all_traders:
+        trader.update()
+    Clock.Clock.setCurrentTime(Clock.Clock.getCurrentTime() + datetime.timedelta(hours=2))
+    print Clock.Clock.getCurrentTime()
 
-print wallet2
+for trader in all_traders:
+    print trader.getWallet().getTotalValBTC()

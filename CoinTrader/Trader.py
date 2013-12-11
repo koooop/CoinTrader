@@ -39,3 +39,6 @@ class Trader(object):
         for entry in self.trading_model.getBuyDistribution():
             result.append(self.getSellAmountBTC() * (entry/100.0))
         return result
+
+    def getWallet(self):
+        return self.wallet
