@@ -6,7 +6,7 @@ class Clock(object):
 
     @staticmethod
     def getCurrentTime():
-        #return datetime.datetime.now() - datetime.timedelta(hours=8)
+        #return datetime.datetime.now() - datetime.timedelta(hours=8) asd
         return Clock.current_time
 
     @staticmethod
